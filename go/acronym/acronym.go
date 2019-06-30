@@ -1,21 +1,59 @@
 // Package acronym implements methods for converting phrases to acronyms.
 package acronym
 
-import "strings"
-import "regexp"
+import (
+	"fmt"
+	"io"
+	"strings"
+	"unicode"
+)
 
 // Abbreviate returns a three letter acronym from a given three word name.
 func Abbreviate(s string) string {
-	reg, err := regexp.Compile("[_-]")
+	lex := &parser{reader: strings.NewReader(s)}
+	result, err := read(lex)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error on read: %v\n", err)
+		return ""
 	}
+	return result
+}
 
-	s = reg.ReplaceAllString(s, " ")
-	words := strings.Fields(s)
-	var result string
-	for _, w := range words {
-		result += w[0:1]
+type parser struct {
+	reader *strings.Reader
+	token  rune
+	added  bool
+}
+
+func (lex *parser) next() error {
+	var err error
+	lex.token, _, err = lex.reader.ReadRune()
+	return err
+}
+
+func (lex *parser) text() string {
+	return string(lex.token)
+}
+
+func read(lex *parser) (string, error) {
+	var builder strings.Builder
+	for err := lex.next(); err != io.EOF; err = lex.next() {
+		if err != nil {
+			return "", err
+		}
+		switch {
+		case isSeparator(lex.token):
+			lex.added = false
+		case unicode.IsLetter(lex.token):
+			if !lex.added {
+				builder.WriteString(strings.ToUpper(lex.text()))
+				lex.added = true
+			}
+		}
 	}
-	return strings.ToUpper(result)
+	return builder.String(), nil
+}
+
+func isSeparator(token rune) bool {
+	return unicode.IsSpace(token) || (unicode.IsPunct(token) && token != '\'')
 }
