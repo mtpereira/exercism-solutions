@@ -7,9 +7,8 @@ import "fmt"
 // It returns either "One for you, one for me" or "One for `name`, one for me", depending on the contents of `name`.
 // If name is an empty string, it returns the first form, otherwise returns the second form.
 func ShareWith(name string) string {
-	person := name
-	if person == "" {
-		person = "you"
+	if name == "" {
+		name = "you"
 	}
-	return fmt.Sprintf("One for %s, one for me.", person)
+	return fmt.Sprintf("One for %s, one for me.", name)
 }
