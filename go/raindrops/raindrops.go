@@ -3,29 +3,28 @@ package raindrops
 
 import (
 	"strconv"
-	"strings"
 )
 
 // Convert a number into a string representing a raindrop sound.
 func Convert(number int) string {
-	var result strings.Builder
+	var result string
 
-	for factor := 1; factor <= number; factor++ {
+	for _, factor := range []int{3, 5, 7} {
 		if number%factor == 0 {
 			switch factor {
 			case 3:
-				result.WriteString("Pling")
+				result += "Pling"
 			case 5:
-				result.WriteString("Plang")
+				result += "Plang"
 			case 7:
-				result.WriteString("Plong")
+				result += "Plong"
 			}
 		}
 	}
 
-	if result.Len() == 0 {
-		result.WriteString(strconv.Itoa(number))
+	if result == "" {
+		result = strconv.Itoa(number)
 	}
 
-	return result.String()
+	return result
 }
